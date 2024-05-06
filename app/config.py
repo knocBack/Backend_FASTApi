@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings
 
 
+# config file, to fetch all values from .env and dump here, into BaseSettings class
 class Settings(BaseSettings):
     database_hostname: str
     database_port: str
@@ -14,7 +15,5 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-
+# initlizes settings, so that they can be used anywhere else
 settings = Settings()
-
-print("Settings loaded successfully:", settings.model_dump())

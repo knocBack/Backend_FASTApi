@@ -4,6 +4,7 @@ from .database import Base
 from datetime import datetime, timezone
 
 
+# users ORM 
 class User(Base):
     __tablename__ = "users"
 
@@ -15,7 +16,7 @@ class User(Base):
 
     user_orders = relationship("Order", back_populates="user")
 
-
+# product ORM
 class Product(Base):
     __tablename__ ="products"
 
@@ -25,7 +26,9 @@ class Product(Base):
     price = Column(Float, nullable = False)
     category = Column(String, nullable = True, index=True)
 
-
+# order ORM
+# Only records Order and  Bill Details. 
+# Order Items are updated in another table called "order_items"
 class Order(Base):
     __tablename__ = "orders"
 
@@ -38,6 +41,9 @@ class Order(Base):
     user = relationship("User", back_populates="user_orders")
     order_items = relationship("OrderItem", back_populates="order")
 
+
+# OrderItems ORM
+# order items, each and every item and its quantity is added here
 class OrderItem(Base):
     __tablename__ = "order_items"
 

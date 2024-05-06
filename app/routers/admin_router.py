@@ -5,8 +5,11 @@ from ..models import User,Product,Order,OrderItem
 from ..schemas import user_schema,product_schema,order_schema
 from typing import List
 
+# admin router
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
+# add product
+# - requires admin authorization
 @router.post('/products/add', response_model=product_schema.ProductPayload)
 def add_product(product_info: product_schema.ProductCreate, db:Session = Depends(database.get_db), current_user: User = Depends(oauth2.get_current_user)):
     try:
@@ -23,9 +26,13 @@ def add_product(product_info: product_schema.ProductCreate, db:Session = Depends
     except Exception as err:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
  
+
+# update product
+# - requires admin authorization
 @router.put("/products/update", response_model=product_schema.ProductPayload)
 def update_product(product_info: product_schema.ProductPayload, db: Session=Depends(database.get_db), current_user: User = Depends(oauth2.get_current_user)):
     try:
+        # check for admin
         if current_user.role != user_schema.UserRole.admin:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"User is unauthorized")
         
@@ -47,7 +54,8 @@ def update_product(product_info: product_schema.ProductPayload, db: Session=Depe
     except Exception as err:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
     
-
+# delte product by id
+# - requires admin authorization
 @router.delete("/products/{product_id}", response_model= product_schema.ProductPayload)
 def delete_product(product_id: int, db: Session=Depends(database.get_db), current_user: User = Depends(oauth2.get_current_user)):
     try:
@@ -69,7 +77,8 @@ def delete_product(product_id: int, db: Session=Depends(database.get_db), curren
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
    
 
-
+# get all user details
+# - requires admin authorization
 @router.get("/users/", response_model=List[user_schema.UserPayload])
 def get_users(
     db: Session = Depends(database.get_db),
@@ -92,7 +101,8 @@ def get_users(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err)
         )
 
-
+# search all user using name
+# - requires admin authorization
 @router.get("/users/search", response_model=List[user_schema.UserPayload])
 def search_users(
     query: str,
@@ -117,6 +127,8 @@ def search_users(
         )
 
 
+# sort all users with different fields mentioned in user_schema
+# - requires admin authorization
 @router.get("/users/sort", response_model=List[user_schema.UserPayload])
 def sort_users(
     field: user_schema.UserSortFields,
@@ -140,7 +152,8 @@ def sort_users(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err)
         )
 
-
+# flter all users by different user roles
+# - requires admin authorization
 @router.get("/users/filter", response_model=List[user_schema.UserPayload])
 def filter_users(
     role: user_schema.UserRole,
@@ -164,6 +177,8 @@ def filter_users(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err)
         )
 
+# get all orders of a user by user_id
+# - requires admin authorization
 @router.get("/orders/user/{user_id}", response_model=List[order_schema.OrderPayload])
 def get_orders_by_user(
     db: Session = Depends(database.get_db),
@@ -183,10 +198,12 @@ def get_orders_by_user(
     except Exception as err:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
 
+# update delivery status of an order
+# - requires admin authorization
 @router.patch("/orders/{order_id}", response_model=order_schema.OrderPayload)
 def update_order_delivery_status(
     order_id: int,
-    delivery_status: bool,
+    delivery_status: order_schema.OrderDeliveryStatus,
     db: Session = Depends(database.get_db),
     current_user: user_schema.UserPayload = Depends(oauth2.get_current_user)
 ):
